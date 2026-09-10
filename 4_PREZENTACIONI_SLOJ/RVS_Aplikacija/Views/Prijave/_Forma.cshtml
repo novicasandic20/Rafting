@@ -1,0 +1,494 @@
+@model PrijavaRaftingViewModel
+@{
+    var ture = ViewBag.Ture as List<RaftingTuraModel>
+        ?? new List<RaftingTuraModel>();
+}
+
+<div id="jsGreske" class="alert alert-danger d-none"></div>
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+<div class="form-section">
+    <h2 class="h5 section-title mb-3">Podaci o prijavi i turi</h2>
+
+    @if (Model.Id > 0)
+    {
+        <div class="mb-3">
+            <label asp-for="BrojPrijave" class="form-label"></label>
+            <input asp-for="BrojPrijave" class="form-control" readonly />
+            <input asp-for="Id" type="hidden" />
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-5 mb-3">
+            <label asp-for="DatumPrijave" class="form-label"></label>
+            <input asp-for="DatumPrijave" class="form-control" />
+            <span asp-validation-for="DatumPrijave" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-7 mb-3">
+            <label asp-for="RaftingTuraId" class="form-label"></label>
+            <select asp-for="RaftingTuraId" class="form-select" id="RaftingTuraId">
+                <option value="">-- izaberite rafting turu --</option>
+                @foreach (var tura in ture)
+                {
+                    <option value="@tura.Id"
+                            data-naziv="@tura.NazivTure"
+                            data-datum="@tura.DatumOdrzavanja.ToString("dd.MM.yyyy.")"
+                            data-lokacija="@tura.LokacijaReka"
+                            data-tezina="@tura.NivoTezineObjekat?.Naziv"
+                            data-kapacitet="@tura.MaksimalanBrojUcesnika"
+                            data-preostalo="@tura.PreostaloMesta"
+                            data-cena="@($"{tura.Cena:N2} RSD")">
+                        @tura.NazivTure — @tura.DatumOdrzavanja.ToString("dd.MM.yyyy.")
+                    </option>
+                }
+            </select>
+            <span asp-validation-for="RaftingTuraId" class="text-danger"></span>
+        </div>
+    </div>
+
+    @if (Model.Id > 0)
+    {
+        <div class="mb-3">
+            <label asp-for="StatusPrijave" class="form-label"></label>
+            @if (User.IsInRole("Admin"))
+            {
+                <select asp-for="StatusPrijave" class="form-select">
+                    <option value="Kreirana">Kreirana</option>
+                    <option value="Potvrđena">Potvrđena</option>
+                    <option value="Otkazana">Otkazana</option>
+                </select>
+            }
+            else
+            {
+                <input asp-for="StatusPrijave" class="form-control" readonly />
+            }
+        </div>
+    }
+    else
+    {
+        <input asp-for="StatusPrijave" type="hidden" value="Kreirana" />
+    }
+
+    <div id="turaPreview" class="tura-preview p-3 d-none">
+        <div class="row g-3">
+            <div class="col-md-6"><span class="info-label">Naziv</span><div id="turaNaziv" class="info-value"></div></div>
+            <div class="col-md-3"><span class="info-label">Datum</span><div id="turaDatum" class="info-value"></div></div>
+            <div class="col-md-3"><span class="info-label">Težina</span><div id="turaTezina" class="info-value"></div></div>
+            <div class="col-md-4"><span class="info-label">Lokacija / reka</span><div id="turaLokacija" class="info-value"></div></div>
+            <div class="col-md-2"><span class="info-label">Kapacitet</span><div id="turaKapacitet" class="info-value"></div></div>
+            <div class="col-md-3"><span class="info-label">Preostalo mesta</span><div id="turaPreostalo" class="info-value"></div></div>
+            <div class="col-md-3"><span class="info-label">Cena</span><div id="turaCena" class="info-value"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h2 class="h5 section-title mb-1">Učesnici prijave</h2>
+            <div class="text-muted">
+                Broj učesnika u prijavi:
+                <strong id="brojUcesnikaPrikaz">@Model.Ucesnici.Count</strong>
+            </div>
+        </div>
+        <button id="dodajUcesnikaDugme" type="button" class="btn btn-outline-primary">
+            + Dodaj učesnika
+        </button>
+    </div>
+
+    <div class="form-section">
+        <h2 class="h5 section-title mb-3">
+            Dokumentacija prijave
+        </h2>
+
+        <div class="mb-3">
+            <label asp-for="PotvrdaUplateFajl"
+                   class="form-label">
+                Potvrda o uplati
+            </label>
+
+            <input asp-for="PotvrdaUplateFajl"
+                   type="file"
+                   class="form-control"
+                   accept=".pdf,.jpg,.jpeg,.png" />
+
+            <div class="form-text">
+                Dozvoljeni formati: PDF, JPG, JPEG i PNG.
+                Maksimalna veličina: 5 MB.
+            </div>
+
+            <span asp-validation-for="PotvrdaUplateFajl"
+                  class="text-danger"></span>
+
+            @if (!string.IsNullOrWhiteSpace(
+                        Model.PostojecaPotvrdaUplateOriginalniNaziv))
+            {
+                <div class="alert alert-success mt-2">
+                    Trenutno priložen dokument:
+                    <strong>
+                        @Model.PostojecaPotvrdaUplateOriginalniNaziv
+                    </strong>
+                </div>
+            }
+
+            <input asp-for="PostojecaPotvrdaUplateOriginalniNaziv"
+                   type="hidden" />
+
+            <input asp-for="PostojecaPotvrdaUplateSacuvaniNaziv"
+                   type="hidden" />
+        </div>
+    </div>
+
+    <div id="ucesniciContainer" class="d-grid gap-3">
+        @for (var i = 0; i < Model.Ucesnici.Count; i++)
+        {
+            var ucesnik = Model.Ucesnici[i];
+
+            <div class="ucesnik-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="ucesnik-naslov">Učesnik @(i + 1)</div>
+                    <button type="button" class="btn btn-outline-danger btn-sm obrisi-ucesnika">
+                        Ukloni
+                    </button>
+                </div>
+
+                <input type="hidden" data-field="Id" name="Ucesnici[@i].Id" value="@ucesnik.Id" />
+                <input type="hidden" data-field="RedniBroj" name="Ucesnici[@i].RedniBroj" value="@(i + 1)" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ime</label>
+                        <input class="form-control" data-field="Ime"
+                               name="Ucesnici[@i].Ime" value="@ucesnik.Ime" required maxlength="50" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Prezime</label>
+                        <input class="form-control" data-field="Prezime"
+                               name="Ucesnici[@i].Prezime" value="@ucesnik.Prezime" required maxlength="50" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">JMBG</label>
+                        <input class="form-control" data-field="JMBG"
+                               name="Ucesnici[@i].JMBG" value="@ucesnik.JMBG"
+                               required maxlength="13" inputmode="numeric"
+                               pattern="\d{13}" />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Datum rođenja</label>
+                        <input type="date" class="form-control" data-field="DatumRodjenja"
+                               name="Ucesnici[@i].DatumRodjenja"
+                               value="@ucesnik.DatumRodjenja.ToString("yyyy-MM-dd")" required />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Kontakt telefon</label>
+                        <input class="form-control" data-field="KontaktTelefon"
+                               name="Ucesnici[@i].KontaktTelefon"
+                               value="@ucesnik.KontaktTelefon" required maxlength="30" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7 mb-3">
+                        <label class="form-label">Adresa</label>
+                        <input class="form-control" data-field="Adresa"
+                               name="Ucesnici[@i].Adresa" value="@ucesnik.Adresa"
+                               required maxlength="150" />
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label">E-mail adresa</label>
+                        <input type="email" class="form-control" data-field="Email"
+                               name="Ucesnici[@i].Email" value="@ucesnik.Email"
+                               required maxlength="128" />
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-lg-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input"
+                                   data-field="ZnaDaPliva"
+                                   name="Ucesnici[@i].ZnaDaPliva"
+                                   value="true" checked="@ucesnik.ZnaDaPliva" />
+                            <label class="form-check-label">Učesnik zna da pliva</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input"
+                                   data-field="PrihvatioIzjavuOdgovornosti"
+                                   name="Ucesnici[@i].PrihvatioIzjavuOdgovornosti"
+                                   value="true" checked="@ucesnik.PrihvatioIzjavuOdgovornosti" />
+                            <label class="form-check-label">Prihvaćena izjava o odgovornosti</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border rounded p-3 bg-light mt-3">
+
+                    <h3 class="h5 section-title mb-4">
+                        Prateća dokumentacija učesnika
+                    </h3>
+
+                    <!-- POTVRDA O DONOŠENJU IDENTIFIKACIONOG DOKUMENTA -->
+                    <div class="mb-4">
+
+                        <div class="form-check">
+
+                            <input type="checkbox"
+                                   class="form-check-input potvrda-identifikacije"
+                                   data-field="PotvrdioDonosenjeIdentifikacionogDokumenta"
+                                   name="Ucesnici[@i].PotvrdioDonosenjeIdentifikacionogDokumenta"
+                                   value="true"
+                                   checked="@(ucesnik.PotvrdioDonosenjeIdentifikacionogDokumenta
+                                                          ? "checked"
+                                                          : null)" />
+
+                        <label class="form-check-label fw-semibold">
+                            Potvrđujem da ću na dan održavanja ture poneti važeći
+                            identifikacioni dokument (ličnu kartu ili pasoš).
+                        </label>
+
+                        </div>
+
+                        <div class="form-text mt-1">
+                            Identifikacioni dokument se ne prilaže online.
+                            Potrebno je poneti original na dan održavanja ture.
+                        </div>
+
+                    </div>
+
+
+                    <div class="row g-4">
+
+                        <!-- POTPISANA IZJAVA -->
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Potpisana izjava o odgovornosti
+                            </label>
+
+                            <input type="file"
+                                   class="form-control"
+                                   data-field="PotpisanaIzjavaFajl"
+                                   name="Ucesnici[@i].PotpisanaIzjavaFajl"
+                                   accept=".pdf,.jpg,.jpeg,.png" />
+
+                            <div class="form-text">
+                                Dozvoljeni formati: PDF, JPG, JPEG i PNG.
+                                Maksimalna veličina: 5 MB.
+                            </div>
+
+                        @if (!string.IsNullOrWhiteSpace(
+                                                ucesnik.PostojecaPotpisanaIzjavaOriginalniNaziv))
+                            {
+                                <div class="alert alert-success mt-2 mb-0">
+                                    Trenutno priložen dokument:
+                                    <strong>
+                                        @ucesnik.PostojecaPotpisanaIzjavaOriginalniNaziv
+                                    </strong>
+                                </div>
+                            }
+
+                            <input type="hidden"
+                                   data-field="PostojecaPotpisanaIzjavaOriginalniNaziv"
+                                   name="Ucesnici[@i].PostojecaPotpisanaIzjavaOriginalniNaziv"
+                                   value="@ucesnik.PostojecaPotpisanaIzjavaOriginalniNaziv" />
+
+                            <input type="hidden"
+                                   data-field="PostojecaPotpisanaIzjavaSacuvaniNaziv"
+                                   name="Ucesnici[@i].PostojecaPotpisanaIzjavaSacuvaniNaziv"
+                                   value="@ucesnik.PostojecaPotpisanaIzjavaSacuvaniNaziv" />
+
+                        </div>
+
+
+                        <!-- SAGLASNOST -->
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Saglasnost roditelja ili staratelja
+                            </label>
+
+                            <input type="file"
+                                   class="form-control"
+                                   data-field="SaglasnostFajl"
+                                   name="Ucesnici[@i].SaglasnostFajl"
+                                   accept=".pdf,.jpg,.jpeg,.png" />
+
+                            <div class="form-text">
+                                Obavezno samo kada je učesnik maloletan.
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                                    ucesnik.PostojecaSaglasnostOriginalniNaziv))
+                            {
+                                <div class="alert alert-success mt-2 mb-0">
+                                    Trenutno priložen dokument:
+                                    <strong>
+                                        @ucesnik.PostojecaSaglasnostOriginalniNaziv
+                                    </strong>
+                                </div>
+                            }
+
+                            <input type="hidden"
+                                   data-field="PostojecaSaglasnostOriginalniNaziv"
+                                   name="Ucesnici[@i].PostojecaSaglasnostOriginalniNaziv"
+                                   value="@ucesnik.PostojecaSaglasnostOriginalniNaziv" />
+
+                            <input type="hidden"
+                                   data-field="PostojecaSaglasnostSacuvaniNaziv"
+                                   name="Ucesnici[@i].PostojecaSaglasnostSacuvaniNaziv"
+                                   value="@ucesnik.PostojecaSaglasnostSacuvaniNaziv" />
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<template id="ucesnikTemplate">
+    <div class="ucesnik-card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="ucesnik-naslov">Učesnik</div>
+            <button type="button" class="btn btn-outline-danger btn-sm obrisi-ucesnika">
+                Ukloni
+            </button>
+        </div>
+
+        <input type="hidden" data-field="Id" value="0" />
+        <input type="hidden" data-field="RedniBroj" value="0" />
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Ime</label>
+                <input class="form-control" data-field="Ime" required maxlength="50" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Prezime</label>
+                <input class="form-control" data-field="Prezime" required maxlength="50" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">JMBG</label>
+                <input class="form-control" data-field="JMBG" required maxlength="13"
+                       inputmode="numeric" pattern="\d{13}" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Datum rođenja</label>
+                <input type="date" class="form-control" data-field="DatumRodjenja" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Kontakt telefon</label>
+                <input class="form-control" data-field="KontaktTelefon" required maxlength="30" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7 mb-3">
+                <label class="form-label">Adresa</label>
+                <input class="form-control" data-field="Adresa" required maxlength="150" />
+            </div>
+            <div class="col-md-5 mb-3">
+                <label class="form-label">E-mail adresa</label>
+                <input type="email" class="form-control" data-field="Email" required maxlength="128" />
+            </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-lg-6">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input"
+                           data-field="ZnaDaPliva" value="true" />
+                    <label class="form-check-label">Učesnik zna da pliva</label>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input"
+                           data-field="PrihvatioIzjavuOdgovornosti" value="true" />
+                    <label class="form-check-label">Prihvaćena izjava o odgovornosti</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="border rounded p-3 bg-light">
+            <div class="fw-semibold mb-3">
+                Dokumentacija učesnika
+            </div>
+
+            <div class="form-check mb-2">
+                <input type="checkbox"
+                       class="form-check-input potvrda-identifikacije"
+                       data-field="PotvrdioDonosenjeIdentifikacionogDokumenta"
+                       value="true" />
+
+                <label class="form-check-label">
+                    Potvrđujem da će učesnik na dan ture poneti
+                    važeću ličnu kartu ili pasoš radi provere identiteta.
+                </label>
+            </div>
+
+            <div class="alert alert-warning mt-2 identifikacija-poruka d-none">
+                Na dan održavanja ture obavezno je poneti originalnu
+                ličnu kartu ili pasoš.
+            </div>
+
+            <div class="mb-3 mt-3">
+                <label class="form-label">
+                    Potpisana izjava o odgovornosti
+                </label>
+
+                <input type="file"
+                       class="form-control"
+                       data-field="PotpisanaIzjavaFajl"
+                       accept=".pdf,.jpg,.jpeg,.png" />
+
+                <div class="form-text">
+                    Dozvoljeni formati: PDF, JPG, JPEG i PNG.
+                    Maksimalna veličina: 5 MB.
+                </div>
+
+                <input type="hidden"
+                       data-field="PostojecaPotpisanaIzjavaOriginalniNaziv"
+                       value="" />
+
+                <input type="hidden"
+                       data-field="PostojecaPotpisanaIzjavaSacuvaniNaziv"
+                       value="" />
+            </div>
+
+            <div class="mb-3 saglasnost-sekcija">
+                <label class="form-label">
+                    Saglasnost roditelja ili staratelja
+                </label>
+
+                <input type="file"
+                       class="form-control"
+                       data-field="SaglasnostFajl"
+                       accept=".pdf,.jpg,.jpeg,.png" />
+
+                <div class="form-text">
+                    Obavezno samo kada je učesnik maloletan.
+                </div>
+
+                <input type="hidden"
+                       data-field="PostojecaSaglasnostOriginalniNaziv"
+                       value="" />
+
+                <input type="hidden"
+                       data-field="PostojecaSaglasnostSacuvaniNaziv"
+                       value="" />
+            </div>
+        </div>
+    </div>
+</template>

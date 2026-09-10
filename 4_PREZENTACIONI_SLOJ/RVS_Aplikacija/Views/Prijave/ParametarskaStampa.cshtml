@@ -1,0 +1,59 @@
+@model PrijavaModel
+@{
+    ViewData["Title"] = "Obrazac prijave";
+}
+
+<div class="no-print d-flex justify-content-between align-items-center mb-3">
+    <a asp-action="Detalji" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Nazad</a>
+    <button class="btn btn-primary" onclick="window.print()">Štampaj obrazac</button>
+</div>
+
+<div class="document-sheet">
+    <div class="document-title">
+        OBRAZAC ZA PRIJAVU UČESNIKA NA RAFTING TURU
+    </div>
+
+    <div class="document-section-title">Podaci o rafting turi</div>
+    <div class="document-row"><div class="label">Naziv ture:</div><div>@Model.RaftingTuraObjekat?.NazivTure</div></div>
+    <div class="document-row"><div class="label">Datum održavanja ture:</div><div>@Model.RaftingTuraObjekat?.DatumOdrzavanja.ToString("dd.MM.yyyy.")</div></div>
+    <div class="document-row"><div class="label">Lokacija / reka:</div><div>@Model.RaftingTuraObjekat?.LokacijaReka</div></div>
+    <div class="document-row"><div class="label">Nivo težine ture:</div><div>@Model.RaftingTuraObjekat?.NivoTezineObjekat?.Naziv</div></div>
+    <div class="document-row"><div class="label">Maksimalan broj učesnika:</div><div>@Model.RaftingTuraObjekat?.MaksimalanBrojUcesnika</div></div>
+    <div class="document-row"><div class="label">Cena ture:</div><div>@Model.RaftingTuraObjekat?.Cena.ToString("N2") RSD</div></div>
+
+    <div class="document-section-title">Podaci o prijavi</div>
+    <div class="document-row"><div class="label">Broj prijave:</div><div>@Model.BrojPrijave</div></div>
+    <div class="document-row"><div class="label">Datum prijave:</div><div>@Model.DatumPrijave.ToString("dd.MM.yyyy.")</div></div>
+    <div class="document-row"><div class="label">Broj učesnika u prijavi:</div><div>@Model.Ucesnici.Count</div></div>
+    <div class="document-row"><div class="label">Status prijave:</div><div>@Model.StatusPrijave</div></div>
+
+    @for (var i = 0; i < Model.Ucesnici.Count; i++)
+    {
+        var ucesnik = Model.Ucesnici.OrderBy(x => x.RedniBroj).ElementAt(i);
+
+        <div class="@(i > 0 ? "page-break-before" : "")">
+            <div class="document-section-title">
+                Podaci o učesniku @(i + 1)
+            </div>
+
+            <div class="document-row"><div class="label">Ime i prezime:</div><div>@ucesnik.ImeIPrezime</div></div>
+            <div class="document-row"><div class="label">JMBG:</div><div>@ucesnik.JMBG</div></div>
+            <div class="document-row"><div class="label">Datum rođenja:</div><div>@ucesnik.DatumRodjenja.ToString("dd.MM.yyyy.")</div></div>
+            <div class="document-row"><div class="label">Adresa:</div><div>@ucesnik.Adresa</div></div>
+            <div class="document-row"><div class="label">Kontakt telefon:</div><div>@ucesnik.KontaktTelefon</div></div>
+            <div class="document-row"><div class="label">E-mail adresa:</div><div>@ucesnik.Email</div></div>
+            <div class="document-row"><div class="label">Da li učesnik zna da pliva:</div><div>@(ucesnik.ZnaDaPliva ? "DA" : "NE")</div></div>
+            <div class="document-row"><div class="label">Prihvatio izjavu o odgovornosti:</div><div>@(ucesnik.PrihvatioIzjavuOdgovornosti ? "DA" : "NE")</div></div>
+
+            <div class="document-section-title">Prateća dokumenta</div>
+            <div class="document-row"><div class="label">Potvrda o uplati:</div><div>@(ucesnik.PotvrdaOUplati ? "PRILOŽENA" : "NIJE PRILOŽENA")</div></div>
+            <div class="document-row"><div class="label">Potpisana izjava o odgovornosti:</div><div>@(ucesnik.PotpisanaIzjavaOdgovornosti ? "PRILOŽENA" : "NIJE PRILOŽENA")</div></div>
+            <div class="document-row"><div class="label">Saglasnost roditelja/staratelja:</div><div>@(ucesnik.SaglasnostRoditeljaStaratelja ? "PRILOŽENA" : "NIJE POTREBNA / NIJE PRILOŽENA")</div></div>
+
+            <div class="row mt-5">
+                <div class="col-6">Datum: __________________</div>
+                <div class="col-6 text-end">Potpis: __________________</div>
+            </div>
+        </div>
+    }
+</div>

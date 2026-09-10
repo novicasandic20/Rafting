@@ -1,0 +1,18 @@
+@model NivoTezineViewModel
+@{
+    ViewData["Title"] = "Dodaj nivo težine";
+}
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h1 class="h3 section-title mb-4">Dodavanje nivoa težine preko REST servisa</h1>
+        <form asp-action="Dodaj" method="post">
+            @Html.AntiForgeryToken()
+            <partial name="_Forma" model="Model" />
+            <button class="btn btn-primary" type="submit">Sačuvaj</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Odustani</a>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

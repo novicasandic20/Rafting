@@ -1,0 +1,239 @@
+@model List<RaftingTuraModel>
+
+@{
+    ViewData["Title"] = "Rafting ture";
+    var filter = ViewData["Filter"] as string;
+
+    string DajSlikuTure(RaftingTuraModel tura)
+    {
+        var naziv = tura.NazivTure.ToLowerInvariant();
+
+        if (naziv.Contains("drin"))
+            return Url.Content("~/images/ture/drina.jpg");
+
+        if (naziv.Contains("lim"))
+            return Url.Content("~/images/ture/lim.jpg");
+
+        if (naziv.Contains("tar"))
+            return Url.Content("~/images/ture/tara.jpg");
+
+        return Url.Content("~/images/rafting-hero.jpg");
+    }
+
+    string DajKlasuTezine(string? tezina)
+    {
+        return tezina switch
+        {
+            "Laka" => "difficulty-easy",
+            "Srednja" => "difficulty-medium",
+            "Teška" => "difficulty-hard",
+            _ => "difficulty-default"
+        };
+    }
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="section-title mb-1">Rafting ture</h1>
+        <p class="text-muted mb-0">
+            Pregled termina, lokacija, kapaciteta i cena.
+        </p>
+    </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Dodaj" class="btn btn-primary">
+            + Dodaj turu
+        </a>
+    }
+</div>
+
+<form method="get" class="card card-body shadow-sm mb-4 rafting-search">
+    <div class="row g-2">
+        <div class="col-md-9">
+            <input name="filter"
+                   value="@filter"
+                   class="form-control"
+                   placeholder="Pretraga po nazivu, reci ili nivou težine" />
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <button class="btn btn-outline-primary"
+                    type="submit">
+                Pretraži
+            </button>
+        </div>
+    </div>
+</form>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-tours">
+        <div class="empty-tours-icon">
+            <i class="bi bi-search"></i>
+        </div>
+
+        <h2 class="h5 mb-2">
+            Nisu pronađene rafting ture
+        </h2>
+
+        <p class="text-muted mb-3">
+            Pokušajte sa drugim nazivom, rekom ili nivoom težine.
+        </p>
+
+        <a asp-action="Index"
+           class="btn btn-outline-primary">
+            Prikaži sve ture
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+
+        @foreach (var tura in Model)
+        {
+            var tezina =
+            tura.NivoTezineObjekat?.Naziv ?? "";
+
+            var preostalo =
+            Math.Max(
+            0,
+            tura.MaksimalanBrojUcesnika -
+            tura.BrojPrijavljenihUcesnika);
+
+            <div class="col-lg-6">
+
+                <div class="tour-list-card h-100">
+
+                    <div class="tour-list-image">
+                        <img src="@DajSlikuTure(tura)"
+                             alt="@tura.NazivTure" />
+                    </div>
+
+                    <div class="tour-list-content">
+
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+
+                            <div>
+                                <h2 class="h5 mb-1">
+                                    @tura.NazivTure
+                                </h2>
+
+                                @if (tura.Aktivna)
+                                {
+                                    <span class="tour-status-active">
+                                        Aktivna
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="tour-status-inactive">
+                                        Neaktivna
+                                    </span>
+                                }
+                            </div>
+
+                            <span class="difficulty-badge @DajKlasuTezine(tezina)">
+                                @tezina
+                            </span>
+
+                        </div>
+
+                        <div class="tour-list-info">
+
+                            <div>
+                                <i class="bi bi-geo-alt"></i>
+                                <span>@tura.LokacijaReka</span>
+                            </div>
+
+                            <div>
+                                <i class="bi bi-calendar3"></i>
+                                <span>
+                                    @tura.DatumOdrzavanja.ToString("dd.MM.yyyy.")
+                                </span>
+                            </div>
+
+                            <div>
+                                <i class="bi bi-people"></i>
+
+                                @if (preostalo == 0)
+                                {
+                                    <span class="text-danger fw-semibold">
+                                        Popunjeno
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @preostalo / @tura.MaksimalanBrojUcesnika
+                                        slobodno
+                                    </span>
+                                }
+                            </div>
+
+                            <div>
+                                <i class="bi bi-tag"></i>
+                                <span>
+                                    @tura.Cena.ToString("N2") RSD
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="tour-list-actions">
+
+                            <a asp-action="Detalji"
+                               asp-route-id="@tura.Id"
+                               class="btn btn-outline-primary btn-sm">
+                                Detalji
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+
+                            @if (User.Identity?.IsAuthenticated == true &&
+                                                tura.Aktivna &&
+                                                preostalo > 0)
+                            {
+                                <a asp-controller="Prijave"
+                                   asp-action="Dodaj"
+                                   asp-route-raftingTuraId="@tura.Id"
+                                   class="btn btn-primary btn-sm">
+                                    Prijavi se
+                                </a>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Izmeni"
+                                   asp-route-id="@tura.Id"
+                                   class="btn btn-outline-secondary btn-sm">
+                                    Izmeni
+                                </a>
+
+                                <form asp-action="Obrisi"
+                                      asp-route-id="@tura.Id"
+                                      method="post"
+                                      class="d-inline">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button class="btn btn-outline-danger btn-sm"
+                                            data-confirm="Obrisati ovu rafting turu?"
+                                            type="submit">
+                                        Obriši
+                                    </button>
+
+                                </form>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}

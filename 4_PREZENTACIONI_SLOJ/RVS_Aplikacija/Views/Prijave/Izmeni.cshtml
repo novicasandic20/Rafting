@@ -1,0 +1,22 @@
+@model PrijavaRaftingViewModel
+@{
+    ViewData["Title"] = "Izmena prijave";
+}
+
+<h1 class="section-title mb-4">Izmena prijave @Model.BrojPrijave</h1>
+
+<form asp-action="Izmeni" method="post" enctype="multipart/form-data" id="prijavaForma" novalidate>
+    @Html.AntiForgeryToken()
+    <partial name="_Forma" model="Model" />
+
+    <div class="d-flex flex-wrap gap-2 no-print">
+        <button class="btn btn-primary btn-lg" type="submit">Sačuvaj izmene</button>
+        <a asp-action="Detalji" asp-route-id="@Model.Id"
+           class="btn btn-outline-secondary btn-lg">Odustani</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/prijavaUcesnici.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,50 @@
+﻿@model List<RaftingTuraModel>
+
+@{
+    var kontroler =
+        ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+<li class="nav-item dropdown rafting-ture-menu">
+
+    <a class="nav-link @(kontroler == "RaftingTure" ? "active-page" : "")"
+       asp-controller="RaftingTure"
+       asp-action="Index">
+
+        Rafting ture
+
+        @if (Model.Count > 0)
+        {
+            <i class="bi bi-chevron-down ms-1 small"></i>
+        }
+    </a>
+
+    @if (Model.Count > 0)
+    {
+        <ul class="dropdown-menu rafting-ture-dropdown">
+
+            @foreach (var tura in Model)
+            {
+                <li>
+                    <a class="dropdown-item"
+                       asp-controller="RaftingTure"
+                       asp-action="Detalji"
+                       asp-route-id="@tura.Id">
+
+                        <span class="d-block fw-semibold">
+                            @tura.NazivTure
+                        </span>
+
+                        <small class="text-muted">
+                            @tura.DatumOdrzavanja.ToString("dd.MM.yyyy.")
+                            · @tura.LokacijaReka
+                        </small>
+
+                    </a>
+                </li>
+            }
+
+        </ul>
+    }
+
+</li>

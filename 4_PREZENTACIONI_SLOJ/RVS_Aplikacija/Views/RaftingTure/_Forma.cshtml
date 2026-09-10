@@ -1,0 +1,60 @@
+@model RaftingTuraViewModel
+@{
+    var nivoi = ViewBag.NivoiTezine as List<NivoTezineModel>
+        ?? new List<NivoTezineModel>();
+}
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="row">
+    <div class="col-lg-8 mb-3">
+        <label asp-for="NazivTure" class="form-label"></label>
+        <input asp-for="NazivTure" class="form-control" />
+        <span asp-validation-for="NazivTure" class="text-danger"></span>
+    </div>
+    <div class="col-lg-4 mb-3"> 
+        <label asp-for="DatumOdrzavanja" class="form-label"></label>
+        <input asp-for="DatumOdrzavanja" class="form-control" />
+        <span asp-validation-for="DatumOdrzavanja" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-3">
+        <label asp-for="LokacijaReka" class="form-label"></label>
+        <input asp-for="LokacijaReka" class="form-control" />
+        <span asp-validation-for="LokacijaReka" class="text-danger"></span>
+    </div>
+    <div class="col-lg-6 mb-3">
+        <label asp-for="NivoTezineId" class="form-label"></label>
+        <select asp-for="NivoTezineId" class="form-select">
+            <option value="">-- izaberite nivo težine --</option>
+            @foreach (var nivo in nivoi)
+            {
+                <option value="@nivo.Id">@nivo.Naziv</option>
+            }
+        </select>
+        <span asp-validation-for="NivoTezineId" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="MaksimalanBrojUcesnika" class="form-label"></label>
+        <input asp-for="MaksimalanBrojUcesnika" class="form-control" />
+        <span asp-validation-for="MaksimalanBrojUcesnika" class="text-danger"></span>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label asp-for="Cena" class="form-label"></label>
+        <div class="input-group">
+            <input asp-for="Cena" class="form-control" step="0.01" />
+            <span class="input-group-text">RSD</span>
+        </div>
+        <span asp-validation-for="Cena" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="form-check mb-4">
+    <input asp-for="Aktivna" class="form-check-input" />
+    <label asp-for="Aktivna" class="form-check-label"></label>
+</div>

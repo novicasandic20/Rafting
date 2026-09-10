@@ -1,0 +1,307 @@
+@model List<PrijavaModel>
+
+@{
+    ViewData["Title"] = "Prijave";
+
+    var filter = ViewData["Filter"] as string;
+    var status = ViewData["Status"] as string;
+
+    var brojSve = (int)(ViewData["BrojSve"] ?? 0);
+    var brojKreirane = (int)(ViewData["BrojKreirane"] ?? 0);
+    var brojPotvrdjene = (int)(ViewData["BrojPotvrdjene"] ?? 0);
+    var brojOdbijene = (int)(ViewData["BrojOdbijene"] ?? 0);
+    var brojOtkazane = (int)(ViewData["BrojOtkazane"] ?? 0);
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="section-title mb-1">Evidencija prijava</h1>
+
+        <p class="text-muted mb-0">
+            @if (User.IsInRole("Admin"))
+            {
+                <span>Pregled svih prijava na rafting ture.</span>
+            }
+            else
+            {
+                <span>Pregled vaših prijava na rafting ture.</span>
+            }
+        </p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="Stampa"
+           asp-route-filter="@filter"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-printer me-1"></i>
+            Štampa spiska
+        </a>
+
+        <a asp-action="Dodaj"
+           class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Nova prijava
+        </a>
+    </div>
+</div>
+
+
+<form method="get"
+      class="card card-body shadow-sm mb-4 application-search-card">
+
+    <div class="row g-2">
+
+        <div class="col-md-9">
+            <div class="input-group">
+                <span class="input-group-text bg-white">
+                    <i class="bi bi-search"></i>
+                </span>
+
+                <input name="filter"
+                       value="@filter"
+                       class="form-control"
+                       placeholder="Broj prijave, naziv ture, lokacija, ime, prezime ili JMBG" />
+            </div>
+        </div>
+
+        <div class="col-md-3 d-grid">
+            <button class="btn btn-outline-primary"
+                    type="submit">
+                Pretraži
+            </button>
+        </div>
+
+    </div>
+</form>
+
+<div class="application-filter-bar mb-4">
+
+    <a asp-action="Index"
+       asp-route-filter="@filter"
+       class="application-filter-btn @(string.IsNullOrWhiteSpace(status) ? "active" : "")">
+
+        Sve
+        <span>@brojSve</span>
+    </a>
+
+
+    <a asp-action="Index"
+       asp-route-filter="@filter"
+       asp-route-status="Kreirana"
+       class="application-filter-btn @(status == "Kreirana" ? "active" : "")">
+
+        <i class="bi bi-clock"></i>
+        Kreirane
+        <span>@brojKreirane</span>
+    </a>
+
+
+    <a asp-action="Index"
+       asp-route-filter="@filter"
+       asp-route-status="Potvrđena"
+       class="application-filter-btn @(status == "Potvrđena" ? "active" : "")">
+
+        <i class="bi bi-check-circle"></i>
+        Potvrđene
+        <span>@brojPotvrdjene</span>
+    </a>
+
+
+    <a asp-action="Index"
+       asp-route-filter="@filter"
+       asp-route-status="Odbijena"
+       class="application-filter-btn @(status == "Odbijena" ? "active" : "")">
+
+        <i class="bi bi-x-circle"></i>
+        Odbijene
+        <span>@brojOdbijene</span>
+    </a>
+
+
+    <a asp-action="Index"
+       asp-route-filter="@filter"
+       asp-route-status="Otkazana"
+       class="application-filter-btn @(status == "Otkazana" ? "active" : "")">
+
+        <i class="bi bi-slash-circle"></i>
+        Otkazane
+        <span>@brojOtkazane</span>
+    </a>
+
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-applications">
+
+        <div class="empty-applications-icon">
+            <i class="bi bi-file-earmark-text"></i>
+        </div>
+
+        <h2 class="h5 mb-2">
+            Nisu pronađene prijave
+        </h2>
+
+        <p class="text-muted mb-3">
+            Pokušajte sa drugim kriterijumom pretrage.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(filter))
+        {
+            <a asp-action="Index"
+               class="btn btn-outline-primary">
+                Prikaži sve prijave
+            </a>
+        }
+
+    </div>
+}
+else
+{
+    <div class="card application-table-card shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table application-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>Broj prijave</th>
+                        <th>Datum prijave</th>
+                        <th>Rafting tura</th>
+                        <th>Datum ture</th>
+                        <th class="text-center">Učesnika</th>
+                        <th>Status</th>
+                        <th class="text-end">Akcije</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var prijava in Model)
+                    {
+                        var statusKlasa = prijava.StatusPrijave switch
+                        {
+                            "Potvrđena" => "application-status-confirmed",
+                            "Odbijena" => "application-status-rejected",
+                            "Otkazana" => "application-status-cancelled",
+                            "Kreirana" => "application-status-created",
+                            _ => "application-status-default"
+                        };
+
+                        var statusIkonica = prijava.StatusPrijave switch
+                        {
+                            "Potvrđena" => "bi-check-circle",
+                            "Odbijena" => "bi-x-circle",
+                            "Otkazana" => "bi-slash-circle",
+                            "Kreirana" => "bi-clock",
+                            _ => "bi-circle"
+                        };
+
+                        <tr>
+
+                            <td>
+                                <div class="application-number">
+                                    @prijava.BrojPrijave
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="text-nowrap">
+                                    @prijava.DatumPrijave.ToString("dd.MM.yyyy.")
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="application-tour-name">
+                                    @prijava.RaftingTuraObjekat?.NazivTure
+                                </div>
+
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    @prijava.RaftingTuraObjekat?.LokacijaReka
+                                </small>
+                            </td>
+
+                            <td>
+                                <span class="text-nowrap">
+                                    @(prijava.RaftingTuraObjekat?.DatumOdrzavanja.ToString("dd.MM.yyyy.") ?? "-")
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                <span class="participant-count">
+                                    <i class="bi bi-people me-1"></i>
+                                    @prijava.BrojUcesnikaIzUpita
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="application-status @statusKlasa">
+                                    <i class="bi @statusIkonica"></i>
+                                    @prijava.StatusPrijave
+                                </span>
+                            </td>
+
+                            <td class="text-end">
+
+                                <div class="application-actions">
+
+                                    <a asp-action="Detalji"
+                                       asp-route-id="@prijava.Id"
+                                       class="btn btn-outline-primary btn-sm"
+                                       title="Detalji">
+                                        <i class="bi bi-eye"></i>
+                                        <span>Detalji</span>
+                                    </a>
+
+                                    <a asp-action="Izmeni"
+                                       asp-route-id="@prijava.Id"
+                                       class="btn btn-outline-secondary btn-sm"
+                                       title="Izmeni">
+                                        <i class="bi bi-pencil"></i>
+                                        <span>Izmeni</span>
+                                    </a>
+
+                                    <a asp-action="ParametarskaStampa"
+                                       asp-route-id="@prijava.Id"
+                                       class="btn btn-outline-dark btn-sm"
+                                       title="Obrazac">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <span>Obrazac</span>
+                                    </a>
+
+                                    <form asp-action="Obrisi"
+                                          asp-route-id="@prijava.Id"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-outline-danger btn-sm"
+                                                title="Obriši"
+                                                data-confirm="Obrisati prijavu @prijava.BrojPrijave?">
+
+                                            <i class="bi bi-trash"></i>
+                                            <span>Obriši</span>
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+}

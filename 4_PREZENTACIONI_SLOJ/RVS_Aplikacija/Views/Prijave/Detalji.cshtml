@@ -1,0 +1,229 @@
+@model PrijavaModel
+@{
+    ViewData["Title"] = "Detalji prijave";
+    var statusKlasa = Model.StatusPrijave switch
+    {
+        "Potvrđena" => "badge-status-potvrđena",
+        "Odbijena" => "badge-status-otkazana",
+        "Otkazana" => "badge-status-otkazana",
+        _ => "badge-status-kreirana"
+    };
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+        <h1 class="section-title mb-1">Prijava @Model.BrojPrijave</h1>
+        <span class="badge @statusKlasa">@Model.StatusPrijave</span>
+    </div>
+    @if (User.IsInRole("Admin") &&
+        Model.StatusPrijave == "Kreirana")
+    {
+        <div class="d-flex gap-2 mb-3">
+            <form asp-action="Odobri"
+                  asp-route-id="@Model.Id"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-success">
+                    Odobri prijavu
+                </button>
+            </form>
+
+            <form asp-action="Odbij"
+                  asp-route-id="@Model.Id"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-danger">
+                    Odbij prijavu
+                </button>
+            </form>
+        </div>
+    }
+    <div class="d-flex gap-2 no-print">
+        <a asp-action="Izmeni" asp-route-id="@Model.Id"
+           class="btn btn-outline-secondary">Izmeni</a>
+        <a asp-action="ParametarskaStampa" asp-route-id="@Model.Id"
+           class="btn btn-primary">Obrazac za štampu</a>
+    </div>
+</div>
+
+<div class="form-section">
+    <h2 class="h5 section-title">Podaci o prijavi</h2>
+    <div class="row g-3 mt-1">
+
+        <div class="col-md-4">
+            <div class="info-label">Broj prijave</div>
+            <div class="info-value">@Model.BrojPrijave</div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-label">Datum prijave</div>
+            <div class="info-value">
+                @Model.DatumPrijave.ToString("dd.MM.yyyy.")
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-label">Broj učesnika</div>
+            <div class="info-value">@Model.Ucesnici.Count</div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-label">Evidentirao korisnik</div>
+            <div class="info-value">
+                @Model.KorisnikObjekat?.ImeIPrezime
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-label">E-mail korisnika</div>
+            <div class="info-value">
+                @Model.KorisnikObjekat?.Email
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="info-label">Potvrda o uplati</div>
+            <div class="info-value">
+                @if (!string.IsNullOrWhiteSpace(
+                                Model.PotvrdaUplateOriginalniNaziv))
+                {
+                    <span>
+                        @Model.PotvrdaUplateOriginalniNaziv ✓
+                    </span>
+                }
+                else
+                {
+                    <span>Nije priložena</span>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="form-section">
+    <h2 class="h5 section-title">Podaci o rafting turi</h2>
+    <div class="row g-3 mt-1">
+        <div class="col-md-4">
+            <div class="info-label">Naziv ture</div>
+            <div class="info-value">@Model.RaftingTuraObjekat?.NazivTure</div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-label">Datum</div>
+            <div class="info-value">@Model.RaftingTuraObjekat?.DatumOdrzavanja.ToString("dd.MM.yyyy.")</div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-label">Nivo težine</div>
+            <div class="info-value">@Model.RaftingTuraObjekat?.NivoTezineObjekat?.Naziv</div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-label">Lokacija / reka</div>
+            <div class="info-value">@Model.RaftingTuraObjekat?.LokacijaReka</div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-label">Maksimalan kapacitet</div>
+            <div class="info-value">@Model.RaftingTuraObjekat?.MaksimalanBrojUcesnika</div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-label">Cena</div>
+            <div class="info-value">@Model.RaftingTuraObjekat?.Cena.ToString("N2") RSD</div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4 section-title mt-4 mb-3">Učesnici</h2>
+
+@foreach (var ucesnik in Model.Ucesnici.OrderBy(x => x.RedniBroj))
+{
+    <div class="ucesnik-card p-3 mb-3">
+        <h3 class="h5 ucesnik-naslov">@ucesnik.RedniBroj. @ucesnik.ImeIPrezime</h3>
+        <div class="row g-3">
+            <div class="col-md-4"><span class="info-label">JMBG</span><div>@ucesnik.JMBG</div></div>
+            <div class="col-md-4"><span class="info-label">Datum rođenja</span><div>@ucesnik.DatumRodjenja.ToString("dd.MM.yyyy.")</div></div>
+            <div class="col-md-4"><span class="info-label">Telefon</span><div>@ucesnik.KontaktTelefon</div></div>
+            <div class="col-md-4"><span class="info-label">Adresa</span><div>@ucesnik.Adresa</div></div>
+            <div class="col-md-4"><span class="info-label">E-mail</span><div>@ucesnik.Email</div></div>
+            <div class="col-md-6"><span class="info-label">Zna da pliva</span><div>@(ucesnik.ZnaDaPliva ? "DA" : "NE")</div></div>
+            <div class="col-md-8"><span class="info-label">Prihvatio izjavu o odgovornosti</span><div>@(ucesnik.PrihvatioIzjavuOdgovornosti ? "DA" : "NE")</div></div>
+        </div>
+        <hr />
+        <div class="mt-3">
+            <h3 class="h5 section-title mb-3">
+                Prateća dokumentacija učesnika
+            </h3>
+
+            <div class="row g-2 small">
+                <div class="col-md-6">
+                    <span class="info-label">
+                        POTVRDA O DONOŠENJU IDENTIFIKACIONOG DOKUMENTA
+                    </span>
+                    <div>
+                        @(ucesnik.PotvrdioDonosenjeIdentifikacionogDokumenta
+                                            ? "DA"
+                                            : "NE")
+                </div>
+            </div>
+
+                <div class="col-md-6">
+                    <span class="info-label">
+                        Potpisana izjava
+                    </span>
+                    <div>
+                    @if (!string.IsNullOrWhiteSpace(
+                                        ucesnik.PotpisanaIzjavaOriginalniNaziv))
+                        {
+                            <span>
+                                @ucesnik.PotpisanaIzjavaOriginalniNaziv ✓
+                            </span>
+                        }
+                        else
+                        {
+                            <span>Nije priložena ✗</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <span class="info-label">
+                        Saglasnost roditelja/staratelja
+                    </span>
+                    <div>
+                        @if (!string.IsNullOrWhiteSpace(
+                                            ucesnik.SaglasnostOriginalniNaziv))
+                        {
+                            <span>
+                                @ucesnik.SaglasnostOriginalniNaziv ✓
+                            </span>
+                        }
+                        else if (ucesnik.Maloletan)
+                        {
+                            <span>Nije priložena ✗</span>
+                        }
+                        else
+                        {
+                            <span>Nije potrebna</span>
+                        }
+                    </div>
+                </div>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="col-md-6">
+                        <span class="info-label">
+                            Identitet proveren na dolasku
+                        </span>
+                        <div>
+                            @(ucesnik.IdentitetProveren ? "DA" : "NE")
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<a asp-action="Index" class="btn btn-outline-secondary no-print">Nazad na spisak</a>

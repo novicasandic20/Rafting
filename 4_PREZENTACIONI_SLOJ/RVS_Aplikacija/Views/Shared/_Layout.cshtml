@@ -1,0 +1,168 @@
+@{
+    var naslov =
+        ViewData["Title"] as string ?? "Rafting evidencija";
+
+    var kontroler =
+        ViewContext.RouteData.Values["controller"]?.ToString();
+}
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@naslov - Rafting evidencija</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="no-print">
+        <nav class="navbar navbar-expand-lg navbar-dark rafting-nav shadow-sm">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
+                   asp-controller="Pocetna"
+                   asp-action="Index">
+
+                    <img src="~/images/rafting-logo.png"
+                         alt="Rafting evidencija"
+                         class="navbar-logo" />
+
+                    <span>Rafting evidencija</span>
+                </a>
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#glavnaNavigacija"
+                        aria-controls="glavnaNavigacija"
+                        aria-expanded="false"
+                        aria-label="Prikaži navigaciju">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="glavnaNavigacija">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link @(kontroler == "Pocetna" ? "active-page" : "")"
+                               asp-controller="Pocetna"
+                               asp-action="Index">
+                                Početna
+                            </a>
+                        </li>
+                        @await Component.InvokeAsync("RaftingTureMeni")
+
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(kontroler == "Prijave" ? "active-page" : "")"
+                                   asp-controller="Prijave"
+                                   asp-action="Index">
+                                    Prijave
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(kontroler == "NivoiTezineAPI" ? "active-page" : "")"
+                                   asp-controller="NivoiTezineAPI"
+                                   asp-action="Index">
+                                    Nivoi težine (REST)
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item d-flex align-items-center text-white-50 me-3">
+                                @User.Identity.Name
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <span class="badge bg-warning text-dark ms-2">Admin</span>
+                                }
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Nalog" asp-action="OdjaviSe" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-outline-light btn-sm" type="submit">Odjava</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Nalog" asp-action="Prijava">Prijava</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn navbar-register-btn ms-lg-2"
+                                   asp-controller="Nalog"
+                                   asp-action="Registracija">
+                                    Registracija
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        @if (TempData["Poruka"] is string poruka)
+        {
+            var tip = TempData["PorukaTip"] as string;
+            <div class="alert @(tip == "greska" ? "alert-danger" : "alert-success") alert-dismissible fade show no-print" role="alert">
+                @poruka
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["Upozorenje"] is string upozorenje)
+        {
+            <div class="alert alert-warning alert-dismissible fade show no-print" role="alert">
+                @upozorenje
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="rafting-footer">
+        <div class="container-fluid px-4">
+
+            <div class="rafting-footer-content">
+
+                <div class="rafting-footer-brand">
+                    <img src="~/images/rafting-logo.png"
+                         alt="Rafting evidencija"
+                         class="rafting-footer-logo" />
+
+                    <div>
+                        <div class="rafting-footer-title">
+                            Rafting evidencija
+                        </div>
+
+                        <div class="rafting-footer-subtitle">
+                            Sistem za evidenciju prijava na rafting ture
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="rafting-footer-copy">
+                    © 2026 Rafting evidencija
+                </div>
+
+            </div>
+
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

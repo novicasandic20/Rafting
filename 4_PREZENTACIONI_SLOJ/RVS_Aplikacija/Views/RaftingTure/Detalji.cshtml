@@ -1,0 +1,243 @@
+@model RaftingTuraModel
+
+@{
+    ViewData["Title"] = "Detalji ture";
+
+    var tezina = Model.NivoTezineObjekat?.Naziv ?? "";
+
+    var tezinaKlasa = tezina switch
+    {
+        "Laka" => "difficulty-easy",
+        "Srednja" => "difficulty-medium",
+        "Teška" => "difficulty-hard",
+        _ => "difficulty-default"
+    };
+
+    var naziv = Model.NazivTure.ToLowerInvariant();
+
+    var slikaTure =
+        naziv.Contains("drin")
+            ? Url.Content("~/images/ture/drina.jpg")
+            : naziv.Contains("lim")
+                ? Url.Content("~/images/ture/lim.jpg")
+                : naziv.Contains("tar")
+                    ? Url.Content("~/images/ture/tara.jpg")
+                    : Url.Content("~/images/rafting-hero.jpg");
+
+    var preostalo =
+        Math.Max(
+            0,
+            Model.MaksimalanBrojUcesnika -
+            Model.BrojPrijavljenihUcesnika);
+}
+
+<div class="tour-details-card shadow-sm">
+
+    <div class="row g-0">
+
+        <!-- SLIKA -->
+        <div class="col-lg-6">
+            <div class="tour-details-image">
+                <img src="@slikaTure"
+                     alt="@Model.NazivTure" />
+            </div>
+        </div>
+
+
+        <!-- PODACI -->
+        <div class="col-lg-6">
+
+            <div class="tour-details-content">
+
+                <div class="d-flex flex-wrap
+                            justify-content-between
+                            align-items-start
+                            gap-3 mb-4">
+
+                    <div>
+                        <div class="text-uppercase
+                                    small fw-semibold
+                                    text-muted mb-2">
+                            Rafting tura
+                        </div>
+
+                        <h1 class="section-title mb-2">
+                            @Model.NazivTure
+                        </h1>
+
+                        <span class="difficulty-badge @tezinaKlasa">
+                            @tezina
+                        </span>
+                    </div>
+
+                    @if (Model.Aktivna)
+                    {
+                        <span class="tour-status-active">
+                            Aktivna
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="tour-status-inactive">
+                            Neaktivna
+                        </span>
+                    }
+
+                </div>
+
+
+                <div class="tour-details-info">
+
+                    <div class="tour-detail-item">
+
+                        <div class="tour-detail-icon">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+
+                        <div>
+                            <div class="info-label">
+                                Datum održavanja
+                            </div>
+
+                            <div class="info-value">
+                                @Model.DatumOdrzavanja.ToString("dd.MM.yyyy.")
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tour-detail-item">
+
+                        <div class="tour-detail-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+
+                        <div>
+                            <div class="info-label">
+                                Lokacija / reka
+                            </div>
+
+                            <div class="info-value">
+                                @Model.LokacijaReka
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tour-detail-item">
+
+                        <div class="tour-detail-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <div>
+                            <div class="info-label">
+                                Preostalo mesta
+                            </div>
+
+                            <div class="info-value">
+
+                                @if (preostalo == 0)
+                                {
+                                    <span class="text-danger">
+                                        Tura je popunjena
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @preostalo /
+                                        @Model.MaksimalanBrojUcesnika
+                                    </span>
+                                }
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="tour-detail-item">
+
+                        <div class="tour-detail-icon">
+                            <i class="bi bi-tag"></i>
+                        </div>
+
+                        <div>
+                            <div class="info-label">
+                                Cena
+                            </div>
+
+                            <div class="info-value">
+                                @Model.Cena.ToString("N2") RSD
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="tour-details-actions">
+
+                    @if (Model.Aktivna && preostalo > 0)
+                    {
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-controller="Prijave"
+                               asp-action="Dodaj"
+                               asp-route-raftingTuraId="@Model.Id"
+                               class="btn btn-primary">
+                                Prijavi se na turu
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Nalog"
+                               asp-action="Prijava"
+                               class="btn btn-primary">
+                                Prijavite se za ovu turu
+                            </a>
+                        }
+                    }
+                    else if (preostalo == 0)
+                    {
+                        <button class="btn btn-secondary"
+                                disabled>
+                            Tura je popunjena
+                        </button>
+                    }
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Nazad na ture
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@if (!string.IsNullOrWhiteSpace(
+    Model.NivoTezineObjekat?.Opis))
+{
+    <div class="tour-description-card shadow-sm">
+
+        <h2 class="h4 section-title mb-3">
+            O turi
+        </h2>
+
+        <p class="mb-0">
+            @Model.NivoTezineObjekat.Opis
+        </p>
+
+    </div>
+}

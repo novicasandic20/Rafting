@@ -1,0 +1,13 @@
+@model GreskaViewModel
+@{
+    ViewData["Title"] = "Greška";
+}
+
+<div class="alert alert-danger">
+    <h1 class="h3">Došlo je do greške.</h1>
+    <p>Pokušajte ponovo ili proverite vezu sa bazom i servisima.</p>
+    @if (Model.PrikaziRequestId)
+    {
+        <p><strong>Identifikator zahteva:</strong> @Model.RequestId</p>
+    }
+</div>

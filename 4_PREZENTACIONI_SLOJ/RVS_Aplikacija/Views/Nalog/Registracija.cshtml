@@ -1,0 +1,197 @@
+﻿@model RegistracijaViewModel
+
+@{
+    ViewData["Title"] = "Registracija";
+}
+
+<div class="auth-page">
+
+    <div class="auth-card auth-card-register shadow-sm">
+
+        <div class="auth-side">
+            <div class="auth-side-content">
+
+                <div class="auth-logo-wrapper">
+                    <img src="~/images/rafting-logo.png"
+                         alt="Rafting evidencija"
+                         class="auth-logo" />
+                </div>
+
+                <h2>Kreirajte svoj nalog</h2>
+
+                <p>
+                    Registrujte se kako biste prijavili sebe i druge
+                    učesnike na rafting ture i pratite status prijava.
+                </p>
+
+            </div>
+        </div>
+
+
+        <div class="auth-form-side">
+
+            <div class="auth-form-content">
+
+                <div class="mb-4">
+
+                    <div class="auth-eyebrow">
+                        Rafting evidencija
+                    </div>
+
+                    <h1 class="section-title mb-2">
+                        Registracija
+                    </h1>
+
+                    <p class="text-muted mb-0">
+                        Unesite osnovne podatke za kreiranje naloga.
+                    </p>
+
+                </div>
+
+
+                <form asp-action="Registracija"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3">
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="Ime"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Ime"
+                                   class="form-control"
+                                   placeholder="Ime" />
+
+                            <span asp-validation-for="Ime"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="Prezime"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Prezime"
+                                   class="form-control"
+                                   placeholder="Prezime" />
+
+                            <span asp-validation-for="Prezime"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label asp-for="Email"
+                               class="form-label">
+                        </label>
+
+                        <div class="input-group auth-input">
+
+                            <span class="input-group-text">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   autocomplete="email"
+                                   placeholder="Unesite email adresu" />
+
+                        </div>
+
+                        <span asp-validation-for="Email"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="Lozinka"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Lozinka"
+                                   class="form-control"
+                                   autocomplete="new-password"
+                                   placeholder="Lozinka" />
+
+                            <span asp-validation-for="Lozinka"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label asp-for="LozinkaPotvrda"
+                                   class="form-label">
+                                Potvrdite lozinku
+                            </label>
+
+                            <input asp-for="LozinkaPotvrda"
+                                   class="form-control"
+                                   autocomplete="new-password"
+                                   placeholder="Ponovite lozinku" />
+
+                            <span asp-validation-for="LozinkaPotvrda"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <button class="btn btn-primary w-100 auth-submit"
+                            type="submit">
+                        Kreiraj nalog
+                    </button>
+
+                </form>
+
+
+                <div class="auth-switch">
+
+                    <span>Već imate nalog?</span>
+
+                    <a asp-controller="Nalog"
+                       asp-action="Prijava">
+                        Prijavite se
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

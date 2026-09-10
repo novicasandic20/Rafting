@@ -1,0 +1,26 @@
+@model PrijavaRaftingViewModel
+@{
+    ViewData["Title"] = "Nova prijava";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="section-title mb-1">Nova prijava na rafting turu</h1>
+        <p class="text-muted mb-0">Unesite podatke o turi i svim učesnicima prijave.</p>
+    </div>
+</div>
+
+<form asp-action="Dodaj"  method="post" enctype="multipart/form-data" id="prijavaForma" novalidate>
+    @Html.AntiForgeryToken()
+    <partial name="_Forma" model="Model" />
+
+    <div class="d-flex flex-wrap gap-2 no-print">
+        <button class="btn btn-primary btn-lg" type="submit">Sačuvaj prijavu</button>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Odustani</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/prijavaUcesnici.js" asp-append-version="true"></script>
+}

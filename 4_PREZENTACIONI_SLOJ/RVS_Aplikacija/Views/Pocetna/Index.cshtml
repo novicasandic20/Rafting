@@ -1,0 +1,448 @@
+@model PocetnaViewModel
+@{
+    ViewData["Title"] = "Početna";
+
+    string DajSlikuTure(RaftingTuraModel tura)
+    {
+        var naziv = tura.NazivTure.ToLowerInvariant();
+
+        if (naziv.Contains("drin"))
+            return Url.Content("~/images/ture/drina.jpg");
+
+        if (naziv.Contains("lim"))
+            return Url.Content("~/images/ture/lim.jpg");
+
+        if (naziv.Contains("tar"))
+            return Url.Content("~/images/ture/tara.jpg");
+
+        return Url.Content("~/images/ture/default.jpg");
+    }
+}
+
+<section class="hero-rafting shadow-sm mb-5">
+    <div class="hero-content">
+
+        <div class="text-uppercase fw-semibold hero-eyebrow mb-3">
+            Rafting ture
+        </div>
+
+        <h1 class="display-4 fw-bold mb-3">
+            Avantura počinje ovde.
+        </h1>
+
+        <p class="lead mb-4">
+            Izaberite rafting turu, prijavite učesnike
+            i dostavite potrebnu dokumentaciju online.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3">
+            <a class="btn btn-light btn-lg"
+               asp-controller="RaftingTure"
+               asp-action="Index">
+                Pregled tura
+            </a>
+
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <a class="btn btn-outline-light btn-lg"
+                   asp-controller="Prijave"
+                   asp-action="Dodaj">
+                    Nova prijava
+                </a>
+            }
+            else
+            {
+                <a class="btn btn-outline-light btn-lg"
+                   asp-controller="Nalog"
+                   asp-action="Prijava">
+                    Prijavite se
+                </a>
+            }
+        </div>
+
+    </div>
+</section>
+
+@if (User.IsInRole("Admin"))
+{
+    <section class="admin-dashboard mb-5">
+
+        <div class="d-flex justify-content-between
+                        align-items-center mb-3">
+
+            <div>
+                <h2 class="section-title mb-1">
+                    Administratorski pregled
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Trenutno stanje prijava i rafting tura.
+                </p>
+            </div>
+
+            <a asp-controller="Prijave"
+               asp-action="Index"
+               class="btn btn-outline-primary">
+                Sve prijave
+                <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+
+        </div>
+
+
+        <div class="row g-4">
+
+            <!-- NA ČEKANJU -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-stat-card">
+
+                    <div class="dashboard-stat-icon dashboard-pending">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+
+                    <div>
+                        <div class="dashboard-stat-value">
+                            @Model.PrijaveNaCekanju
+                        </div>
+
+                        <div class="dashboard-stat-label">
+                            Prijave na čekanju
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- POTVRĐENE -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-stat-card">
+
+                    <div class="dashboard-stat-icon dashboard-confirmed">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+
+                    <div>
+                        <div class="dashboard-stat-value">
+                            @Model.PotvrdjenePrijave
+                        </div>
+
+                        <div class="dashboard-stat-label">
+                            Potvrđene prijave
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- AKTIVNE TURE -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-stat-card">
+
+                    <div class="dashboard-stat-icon dashboard-tours">
+                        <i class="bi bi-water"></i>
+                    </div>
+
+                    <div>
+                        <div class="dashboard-stat-value">
+                            @Model.AktivneTure
+                        </div>
+
+                        <div class="dashboard-stat-label">
+                            Aktivne ture
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- UČESNICI -->
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-stat-card">
+
+                    <div class="dashboard-stat-icon dashboard-participants">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <div>
+                        <div class="dashboard-stat-value">
+                            @Model.UkupnoUcesnika
+                        </div>
+
+                        <div class="dashboard-stat-label">
+                            Prijavljenih učesnika
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+}
+
+<section class="mb-5">
+    <section class="mb-5">
+        <div class="row g-4">
+
+            <div class="col-md-6 col-xl-3">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="bi bi-person"></i>
+                    </div>
+
+                    <div class="feature-content">
+                        <div class="feature-number">01</div>
+
+                        <h3>Jednostavna prijava</h3>
+
+                        <p>
+                            Unos prijave i svih učesnika kroz
+                            jednu preglednu formu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6 col-xl-3">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+
+                    <div class="feature-content">
+                        <div class="feature-number">02</div>
+
+                        <h3>Dokumentacija</h3>
+
+                        <p>
+                            Dostavljanje potvrde o uplati,
+                            izjave i potrebnih saglasnosti.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6 col-xl-3">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <div class="feature-content">
+                        <div class="feature-number">03</div>
+
+                        <h3>Kontrola kapaciteta</h3>
+
+                        <p>
+                            Sistem automatski vodi računa
+                            o raspoloživim mestima na turi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6 col-xl-3">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+
+                    <div class="feature-content">
+                        <div class="feature-number">04</div>
+
+                        <h3>Pregled prijava</h3>
+
+                        <p>
+                            Korisnik prati status,
+                            a administrator obrađuje prijave.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</section>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="section-title mb-0">Predstojeće aktivne ture</h2>
+    <a asp-controller="RaftingTure" asp-action="Index" class="btn btn-outline-primary">
+        Sve ture
+    </a>
+</div>
+
+@if (Model.Ture.Count == 0)
+{
+    <div class="alert alert-info">Trenutno nema aktivnih predstojećih tura.</div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var tura in Model.Ture)
+        {
+            <div class="col-md-6 col-xl-6">
+                <div class="card rafting-card tour-card-modern h-100 shadow-sm">
+
+                    <div class="row g-0 h-100">
+
+                        <div class="col-md-4">
+                            <div class="tour-image-wrapper">
+                                <img src="@DajSlikuTure(tura)"
+                                     alt="@tura.NazivTure"
+                                     class="tour-card-image" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="card-body h-100 d-flex flex-column">
+
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                    <h3 class="h5 mb-0">
+                                        @tura.NazivTure
+                                    </h3>
+
+                                    @{
+                                        var tezina = tura.NivoTezineObjekat?.Naziv ?? "";
+
+                                        var tezinaKlasa = tezina switch
+                                        {
+                                            "Laka" => "difficulty-easy",
+                                            "Srednja" => "difficulty-medium",
+                                            "Teška" => "difficulty-hard",
+                                            _ => "difficulty-default"
+                                        };
+                                    }
+
+                                    <span class="difficulty-badge @tezinaKlasa">
+                                        @tezina
+                                    </span>
+                                </div>
+
+                                <div class="tour-info-modern">
+
+                                    <div class="tour-info-item">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span>@tura.LokacijaReka</span>
+                                    </div>
+
+                                    <div class="tour-info-item">
+                                        <i class="bi bi-calendar3"></i>
+                                        <span>
+                                            @tura.DatumOdrzavanja.ToString("dd.MM.yyyy.")
+                                        </span>
+                                    </div>
+
+                                    <div class="tour-info-item">
+                                        <i class="bi bi-people"></i>
+                                        <span>
+                                            <strong>@tura.PreostaloMesta</strong>
+                                            / @tura.MaksimalanBrojUcesnika mesta
+                                        </span>
+                                    </div>
+
+                                    <div class="tour-info-item">
+                                        <i class="bi bi-tag"></i>
+                                        <span>
+                                            @tura.Cena.ToString("N2") RSD
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                                <div class="mt-auto pt-3">
+                                    <a asp-controller="RaftingTure"
+                                       asp-action="Detalji"
+                                       asp-route-id="@tura.Id"
+                                       class="btn btn-outline-primary tour-details-btn">
+                                        Detalji
+                                        <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const kartice =
+                document.querySelectorAll(".feature-card");
+
+            if (kartice.length === 0) {
+                return;
+            }
+
+            let aktivna = 0;
+            let intervalId = null;
+
+            function aktivirajSledecu() {
+
+                kartice.forEach(kartica => {
+                    kartica.classList.remove("feature-active");
+                });
+
+                kartice[aktivna]
+                    .classList.add("feature-active");
+
+                aktivna++;
+
+                if (aktivna >= kartice.length) {
+                    aktivna = 0;
+                }
+            }
+
+            function pokreniAnimaciju() {
+
+                if (intervalId !== null) {
+                    return;
+                }
+
+                intervalId = setInterval(
+                    aktivirajSledecu,
+                    3500
+                );
+            }
+
+            function zaustaviAnimaciju() {
+
+                if (intervalId !== null) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            }
+
+            kartice.forEach(kartica => {
+
+                kartica.addEventListener(
+                    "mouseenter",
+                    zaustaviAnimaciju
+                );
+
+                kartica.addEventListener(
+                    "mouseleave",
+                    pokreniAnimaciju
+                );
+
+            });
+
+            aktivirajSledecu();
+            pokreniAnimaciju();
+        });
+    </script>
+}       

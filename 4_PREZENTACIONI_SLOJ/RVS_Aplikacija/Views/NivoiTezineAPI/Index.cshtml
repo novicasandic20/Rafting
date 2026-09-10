@@ -1,0 +1,143 @@
+@model List<NivoTezineModel>
+
+@{
+    ViewData["Title"] = "Nivoi težine";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+
+    <div>
+        <h1 class="section-title mb-1">
+            Nivoi težine
+        </h1>
+
+        <p class="text-muted mb-0">
+            Upravljanje nivoima težine rafting tura preko REST servisa.
+        </p>
+    </div>
+
+    <a asp-action="Dodaj"
+       class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>
+        Dodaj nivo
+    </a>
+
+</div>
+
+
+@if (Model.Count == 0)
+{
+    <div class="empty-levels">
+
+        <div class="empty-levels-icon">
+            <i class="bi bi-exclamation-circle"></i>
+        </div>
+
+        <h2 class="h5 mb-2">
+            Nema dostupnih nivoa težine
+        </h2>
+
+        <p class="text-muted mb-0">
+            Podaci trenutno nisu dostupni ili REST servis nije pokrenut.
+        </p>
+
+    </div>
+}
+else
+{
+    <div class="card difficulty-table-card shadow-sm">
+
+        <div class="table-responsive">
+
+            <table class="table difficulty-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th style="width: 180px;">Nivo težine</th>
+                        <th>Opis</th>
+                        <th class="text-end" style="width: 180px;">
+                            Akcije
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var nivo in Model)
+                    {
+                        var tezinaKlasa = nivo.Naziv switch
+                        {
+                            "Laka" => "difficulty-easy",
+                            "Srednja" => "difficulty-medium",
+                            "Teška" => "difficulty-hard",
+                            _ => "difficulty-default"
+                        };
+
+                     
+
+                        <tr>
+
+                            <td>
+                                <span class="difficulty-id">
+                                    @nivo.Id
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="difficulty-badge difficulty-level-badge @tezinaKlasa">
+                                    @nivo.Naziv
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="difficulty-description">
+                                    @nivo.Opis
+                                </div>
+                            </td>
+
+                            <td class="text-end">
+
+                                <div class="difficulty-actions">
+
+                                    <a asp-action="Izmeni"
+                                       asp-route-id="@nivo.Id"
+                                       class="btn btn-outline-secondary btn-sm">
+
+                                        <i class="bi bi-pencil me-1"></i>
+                                        Izmeni
+                                    </a>
+
+                                    <form asp-action="Obrisi"
+                                          asp-route-id="@nivo.Id"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-outline-danger btn-sm"
+                                                data-confirm="Obrisati nivo težine @nivo.Naziv?">
+
+                                            <i class="bi bi-trash me-1"></i>
+                                            Obriši
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+}

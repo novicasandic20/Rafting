@@ -1,0 +1,49 @@
+@model List<PrijavaModel>
+@{
+    ViewData["Title"] = "Štampa prijava";
+    var filter = ViewData["Filter"] as string;
+}
+
+<div class="no-print d-flex justify-content-between align-items-center mb-3">
+    <a asp-action="Index" asp-route-filter="@filter" class="btn btn-outline-secondary">Nazad</a>
+    <button class="btn btn-primary" onclick="window.print()">Štampaj</button>
+</div>
+
+<div class="document-sheet">
+    <div class="document-title">SPISAK PRIJAVA NA RAFTING TURE</div>
+
+    @if (!string.IsNullOrWhiteSpace(filter))
+    {
+        <p><strong>Primеnjen filter:</strong> @filter</p>
+    }
+
+    <p><strong>Datum štampe:</strong> @DateTime.Now.ToString("dd.MM.yyyy. HH:mm")</p>
+
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th>Broj prijave</th>
+                <th>Datum</th>
+                <th>Tura</th>
+                <th>Datum ture</th>
+                <th>Lokacija</th>
+                <th>Učesnika</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prijava in Model)
+            {
+                <tr>
+                    <td>@prijava.BrojPrijave</td>
+                    <td>@prijava.DatumPrijave.ToString("dd.MM.yyyy.")</td>
+                    <td>@prijava.RaftingTuraObjekat?.NazivTure</td>
+                    <td>@prijava.RaftingTuraObjekat?.DatumOdrzavanja.ToString("dd.MM.yyyy.")</td>
+                    <td>@prijava.RaftingTuraObjekat?.LokacijaReka</td>
+                    <td>@prijava.BrojUcesnikaIzUpita</td>
+                    <td>@prijava.StatusPrijave</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
